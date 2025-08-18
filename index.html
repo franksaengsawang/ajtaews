@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EcoCommute • Gamified Sustainable Travel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      /* "Patriotic" Red, White, and Blue Palette */
+      --bg: #192A56;          /* Deep Blue */
+      --card-bg: rgba(40, 58, 106, 0.5); /* Semi-transparent blue card */
+      --card-border: rgba(255, 255, 255, 0.1); /* Subtle white border */
+      --muted: #B0BEC5;         /* Light Blue-Grey */
+      --text: #FFFFFF;          /* White */
+      --text-bright: #FFFFFF;     /* Pure white */
+      --primary: #E53935;       /* Vibrant Red */
+      --primary-glow: rgba(229, 57, 53, 0.3); /* Red glow effect */
+      --accent: #03A9F4;        /* Bright Blue */
+      --success: #FF5252;       /* Bright/Lighter Red for gradients */
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 20px;
+    }
+    
+    /* General Smoothness & Animations */
+    *, *::before, *::after{
+        box-sizing: border-box;
+        transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+    
+    @keyframes animate-glow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+
+    html,body{ height:100%; }
+    
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow-x: hidden;
+      /* Animated Aurora Background */
+      background: radial-gradient(circle at 10% 20%, var(--primary) 0%, transparent 25%),
+                  radial-gradient(circle at 90% 80%, var(--accent) 0%, transparent 25%),
+                  var(--bg);
+      background-size: 400% 400%;
+      animation: animate-glow 20s ease infinite;
+    }
+
+    .app{max-width:1200px;margin:0 auto; padding:20px 16px 120px}
+    
+    header{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; margin: 8px 0 24px;
+      animation: fadeInUp 0.5s 0.1s ease-out forwards;
+      opacity: 0;
+    }
+
+    .logo{display:flex; align-items:center; gap:12px; font-weight:800; font-size: 22px; color: var(--text-bright); letter-spacing:-.5px}
+    .leaf{width:36px; height:36px; display:grid; place-items:center; background:linear-gradient(135deg,var(--primary),var(--accent)); border-radius:12px;}
+
+    .chip{padding:8px 14px; border-radius:999px; background:var(--card-bg); color:var(--text); backdrop-filter: blur(10px); font-size:14px; font-weight: 500; border:1px solid var(--card-border)}
+    
+    /* Upgraded Card with Glassmorphism Effect */
+    .card{
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px); /* For Safari */
+      border:1px solid var(--card-border); 
+      border-radius:var(--radius); 
+      box-shadow:var(--shadow);
+    }
+    
+    .grid{display:grid; gap:20px}
+    .grid.cols-2{grid-template-columns: 2fr 1fr} /* Main content wider */
+    .grid.cols-3{grid-template-columns: repeat(3, 1fr)}
+    @media (max-width:900px){
+      .grid.cols-2{grid-template-columns:1fr}
+      .grid.cols-3{grid-template-columns:1fr}
+    }
+
+    .stat{padding:20px; display:flex; gap:16px; align-items:center;}
+    .stat .icon{width:48px;height:48px;border-radius:14px; display:grid; place-items:center; background:var(--bg);}
+    .stat .icon svg{width:24px; height:24px; color: var(--primary);}
+    .stat .value{font-size:24px; font-weight:700; color:var(--text-bright)}
+    .stat .label{font-size:14px; color:var(--muted)}
+    
+    /* Upgraded CTA Buttons */
+    .cta{
+      display:inline-flex; align-items:center; justify-content: center; gap:8px; padding:12px 20px; border-radius:14px; border:1px solid var(--card-border); background:var(--card-bg); backdrop-filter: blur(10px); color:var(--text); cursor:pointer; text-decoration:none; font-weight:600; font-size: 15px;
+    }
+    .cta:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+    .cta.primary{background:var(--primary); color: var(--text-bright); border: none;}
+    .cta.primary:hover{ background: #F06292; box-shadow: 0 0 20px var(--primary-glow); }
+    .cta:active{transform: translateY(0px) scale(0.98)}
+    
+    .pill{padding:8px 14px; border-radius:999px; font-size:13px; font-weight:600; border:1px solid var(--card-border); background:var(--bg); color:var(--text)}
+    
+    .progress{height:12px; background:var(--bg); border:1px solid var(--card-border); border-radius:999px; overflow:hidden}
+    .progress > span{display:block; height:100%; background:linear-gradient(90deg,var(--primary),var(--success)); transition: width 0.5s ease-out;}
+    
+    .section{padding:24px}
+    .h1{font-size:32px; font-weight:800; color:var(--text-bright); letter-spacing: -1px;}
+    .h2{font-size:22px; font-weight:700; color:var(--text-bright)}
+    .muted{color:var(--muted)}
+    .divider{height:1px; background:var(--card-border); margin:16px 0}
+
+    /* Tabs / nav - Upgraded Look & Feel */
+    .tabs{position:fixed; bottom:20px; left:0; right:0; display:flex; justify-content:center; pointer-events:none; z-index: 100;}
+    .tabs .wrap{
+        pointer-events:auto; 
+        background:var(--card-bg);
+        border:1px solid var(--card-border); 
+        backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-radius:18px; 
+        padding:8px; display:flex; gap:6px; box-shadow: var(--shadow);
+    }
+    .tab{
+        flex:1; min-width:100px; display:flex; align-items:center; justify-content:center; gap:8px; 
+        padding:10px 14px; border-radius:12px; color:var(--muted); 
+        cursor:pointer; border:1px solid transparent; font-weight: 500;
+        background: transparent;
+    }
+    .tab:hover { color: var(--text-bright); }
+    .tab.active{
+        background:var(--primary); 
+        color: var(--text-bright);
+        box-shadow: 0 0 20px var(--primary-glow);
+    }
+    .tab svg {width:20px; height:20px;}
+
+    .reward{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px; border-radius:14px; border:1px solid var(--card-border); background:var(--bg)}
+    .board-row{display:grid; grid-template-columns: 32px 1fr auto; align-items:center; gap:12px; padding:14px; border-bottom:1px solid var(--card-border)}
+    .board-row:last-child {border-bottom: none;}
+
+    .activity, .post {padding:16px; border:1px solid var(--card-border); border-radius:14px; background:var(--bg)}
+    
+    /* Toast - Styled to match theme */
+    .toast{position:fixed; top:18px; left:50%; background:var(--card-bg); border:1px solid var(--card-border); backdrop-filter: blur(10px); color:var(--text); padding:10px 18px; border-radius:999px; box-shadow:var(--shadow); transform:translateX(-50%) translateY(0); opacity:0; transition: all .4s ease; pointer-events: none; z-index: 200;}
+    .toast.show{opacity:1; transform:translateX(-50%) translateY(20px)}
+
+    /* Modal - Styled to match theme */
+    dialog{padding:0; overflow:hidden; border:none; border-radius:var(--radius); background:var(--card-bg); backdrop-filter:blur(10px); color:var(--text); border:1px solid var(--card-border); width:min(560px,92%)}
+    dialog::backdrop{background:rgba(0,0,0,.5); backdrop-filter: blur(4px);}
+    .modal-header{display:flex; align-items:center; justify-content:space-between; padding:16px 24px; border-bottom:1px solid var(--card-border)}
+    .modal-content{padding:24px}
+    input,select{width:100%; font-size:16px; padding:14px; background:var(--bg); color:var(--text); border:1px solid var(--card-border); border-radius:12px}
+
+    /* Tiny confetti for milestones */
+    .confetti{position:fixed; inset:0; pointer-events:none; z-index: 300;}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">
+        <div class="leaf">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 20A7 7 0 0 1 4 13V6a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v1a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1V6a1 1 0 0 1 1-1h1a1 1 0 0 1 1 1v7a7 7 0 0 1-7 7z"/>
+                <path d="M15 10v1a3 3 0 0 0 3 3h1a2 2 0 1 0 0-4h-1a1 1 0 0 0-1 1z"/>
+            </svg>
+        </div>
+        EcoCommute
+      </div>
+      <div class="chip" id="dayStreak">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5c.3-.3.8-.3 1.1 0l6 6c.3.3.3.8 0 1.1l-2.5 2.5c-.3.3-.8.3-1.1 0l-6-6c-.3-.3-.3-.8 0-1.1l2.5-2.5z"></path><path d="M12 10.5 6.5 16c-.3.3-.8.3-1.1 0l-2.5-2.5c-.3-.3-.3-.8 0-1.1l6-6c.3-.3.8-.3 1.1 0l2.5 2.5z"></path><path d="m18.5 7.5-5 5"></path><path d="m12.5 13.5-5 5"></path><path d="M4 20h.01"></path><path d="M9 15h.01"></path></svg>
+        <span style="margin-left: 6px;">0‑day streak</span>
+      </div>
+    </header>
+
+    <!-- Tab content gets a fade-in animation -->
+    <main>
+      <!-- HOME -->
+      <section id="tab-home" class="tabview fade-in-up">
+        <div class="grid cols-2">
+          <!-- Main Stats Column -->
+          <div class="fade-in-up" style="animation-delay: 0.2s;">
+            <div class="card section">
+              <div class="h1">Today's Impact</div>
+              <div class="muted">Your eco-friendly travel stats for today.</div>
+              <div class="grid cols-3" style="margin-top:20px">
+                <div class="stat card"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></div><div><div class="value" id="todayKm">0.0 km</div><div class="label">Eco Miles</div></div></div>
+                <div class="stat card"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2-7.5 7.5 7.5 7.5 7.5-7.5Z"></path></svg></div><div><div class="value" id="todayPts">0 pts</div><div class="label">Points Earned</div></div></div>
+                <div class="stat card"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></svg></div><div><div class="value" id="co2Saved">0.00 kg</div><div class="label">CO₂ Saved</div></div></div>
+              </div>
+
+              <div style="margin-top:24px">
+                <div class="h2">Weekly Goal</div>
+                <div class="progress" style="margin-top:12px"><span id="goalBar"></span></div>
+                <div class="muted" style="margin-top:8px"><span id="weekTotal">0.0</span> / <span id="weekGoal">30</span> km</div>
+              </div>
+
+              <div style="margin-top:24px; display:flex; gap:12px; flex-wrap:wrap">
+                <button class="cta primary" id="btnQuickLog">+ Quick Log</button>
+                <button class="cta" id="btnStartGPS">▶ Start GPS</button>
+                <button class="cta" id="btnSetGoal">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    Weekly Goal</button>
+              </div>
+            </div>
+          </div>
+          <!-- Side Column -->
+          <div class="grid" style="gap:20px">
+            <div class="card section fade-in-up" style="animation-delay: 0.3s;">
+              <div class="h2">Challenges</div>
+              <div class="muted" style="margin-top:6px">Unlock achievements and climb the ranks.</div>
+              <div class="divider"></div>
+              <div class="grid cols-3" style="gap:10px;">
+                  <div class="stat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 6V4c0-1.1-.9-2-2-2h-2"></path><path d="M3 18v2c0 1.1.9 2 2 2h2"></path><path d="M19 12a7 7 0 1 0-14 0"></path><path d="M12 12a3 3 0 1 0-6 0c0 1.7 1.3 3 3 3s3-1.3 3-3"></path></svg></div><div><div class="value" id="longestStreak">0</div><div class="label">Longest streak</div></div></div>
+                  <div class="stat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6.533c3.843.91 6.533 4.544 6.533 8.717 0 4.173-2.69 7.807-6.533 8.717-3.843-.91-6.533-4.544-6.533-8.717 0-4.173 2.69-7.807 6.533-8.717zM12 6.533C10.158 3.515 7.18 2 4.25 2S-.25 3.515 2 6.533"></path></svg></div><div><div class="value" id="badgesCount">0</div><div class="label">Badges</div></div></div>
+                  <div class="stat"><div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg></div><div><div class="value" id="rank">Bronze</div><div class="label">Rank</div></div></div>
+                </div>
+            </div>
+            <div class="card section fade-in-up" style="animation-delay: 0.4s;">
+              <div class="h2">Recent Activity</div>
+              <div id="recentList" class="grid" style="margin-top:8px"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-rewards" class="tabview" hidden><div class="card section"><div style="display:flex; justify-content:space-between; align-items:end; gap:12px"><div><div class="h1">Rewards</div><div class="muted">Redeem points for eco-friendly deals.</div></div><div class="pill">My Points: <span id="myPoints">0</span></div></div><div class="divider"></div><div id="rewardsList" class="grid"></div></div></section>
+      <section id="tab-leaderboard" class="tabview" hidden><div class="card section"><div class="h1">Leaderboard</div><div class="muted">Top daily eco miles.</div><div class="divider"></div><div id="board"></div></div></section>
+      <section id="tab-history" class="tabview" hidden><div class="card section"><div class="h1">Activity History</div><div class="muted">All your logged trips and achievements.</div><div class="divider"></div><div id="historyList" class="grid"></div></div></section>
+      <section id="tab-community" class="tabview" hidden><div class="card section"><div style="display:flex; justify-content:space-between; align-items:center; gap:12px"><div class="h1">Community</div><button class="cta" id="btnShare">Share Progress</button></div><div class="divider"></div><div id="feed" class="grid"></div></div></section>
+    </main>
+    
+    <nav class="tabs">
+      <div class="wrap">
+        <button class="tab active" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>Home</button>
+        <button class="tab" data-tab="rewards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>Rewards</button>
+        <button class="tab" data-tab="leaderboard"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.5a3.5 3.5 0 0 0 4 0"></path><path d="M8 21.01V20c0-2.2 1.8-4 4-4s4 1.8 4 4v1.01"></path><path d="M12 4V2"></path><path d="M12 9V6.5"></path></svg>Leaderboard</button>
+        <button class="tab" data-tab="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>History</button>
+        <button class="tab" data-tab="community"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Community</button>
+      </div>
+    </nav>
+  </div>
+
+  <dialog id="logModal"><div class="modal-header"><div style="font-weight:700">Quick Log Eco Miles</div><button style="background:transparent;border:0;color:var(--muted);font-size:24px;cursor:pointer" onclick="logModal.close()">✕</button></div><div class="modal-content"><div class="grid cols-2"><label><div class="muted" style="margin-bottom:8px">Distance (km)</div><input id="logKm" type="number" step="0.1" min="0" placeholder="e.g., 4.2"></label><label><div class="muted" style="margin-bottom:8px">Mode</div><select id="logMode"><option value="bike">Bike</option><option value="walk">Walk</option><option value="transit">Public Transit</option></select></label></div><label style="display:block; margin-top:16px"><div class="muted" style="margin-bottom:8px">Notes (optional)</div><input id="logNote" placeholder="Morning ride to work"/></label><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:24px"><button class="cta" onclick="logModal.close()">Cancel</button><button class="cta primary" id="btnSaveLog">Save</button></div></div></dialog>
+  <dialog id="goalModal"><div class="modal-header"><div style="font-weight:700">Set Weekly Goal (km)</div><button style="background:transparent;border:0;color:var(--muted);font-size:24px;cursor:pointer" onclick="goalModal.close()">✕</button></div><div class="modal-content"><input id="goalInput" type="number" min="5" step="5"/><div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px"><button class="cta" onclick="goalModal.close()">Cancel</button><button class="cta primary" id="btnSaveGoal">Save Goal</button></div></div></dialog>
+
+  <div class="toast" id="toast">Saved</div>
+  <canvas class="confetti" id="confetti"></canvas>
+
+  <script>
+    // --- Application State and Data Persistence ---
+    const STORE_KEY = 'eco-commute-v2';
+    const defaults = {
+        weekGoal: 30,
+        points: 0,
+        badges: [],
+        streak: 0,
+        longestStreak: 0,
+        rank: 'Bronze',
+        activities: [],
+    };
+
+    function loadState() {
+        try {
+            const storedState = localStorage.getItem(STORE_KEY);
+            return storedState ? { ...defaults, ...JSON.parse(storedState) } : { ...defaults };
+        } catch (e) {
+            console.error("Failed to load state from localStorage", e);
+            return { ...defaults };
+        }
+    }
+
+    function saveState(state) {
+        try {
+            localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        } catch (e) {
+            console.error("Failed to save state to localStorage", e);
+        }
+    }
+
+    let state = loadState();
+
+    // --- Constants and Helpers ---
+    const KM_TO_POINTS = 10;
+    const CO2_PER_KM_SAVED = 0.21; // kg of CO2 saved per km vs a car
+    const todayISO = () => new Date().toISOString().slice(0, 10);
+    const formatNumber = (n, d = 1) => Number(n).toFixed(d);
+    const escapeHTML = (s) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#039;' }[c]));
+
+
+    // --- Element Selectors ---
+    const elements = {
+        todayKm: document.getElementById('todayKm'),
+        todayPts: document.getElementById('todayPts'),
+        co2Saved: document.getElementById('co2Saved'),
+        weekTotal: document.getElementById('weekTotal'),
+        weekGoal: document.getElementById('weekGoal'),
+        goalBar: document.getElementById('goalBar'),
+        dayStreak: document.querySelector('#dayStreak span'),
+        longestStreak: document.getElementById('longestStreak'),
+        badgesCount: document.getElementById('badgesCount'),
+        rank: document.getElementById('rank'),
+        recentList: document.getElementById('recentList'),
+        myPoints: document.getElementById('myPoints'),
+        rewardsList: document.getElementById('rewardsList'),
+        leaderboard: document.getElementById('board'),
+        historyList: document.getElementById('historyList'),
+        communityFeed: document.getElementById('feed'),
+        logModal: document.getElementById('logModal'),
+        goalModal: document.getElementById('goalModal'),
+        toast: document.getElementById('toast'),
+        confettiCanvas: document.getElementById('confetti'),
+    };
+    
+    // --- Core Application Logic ---
+    
+    function addActivity(km, mode, note) {
+        const activity = {
+            id: crypto.randomUUID(),
+            km: parseFloat(km.toFixed(2)),
+            mode,
+            note,
+            dateISO: new Date().toISOString()
+        };
+        state.activities.unshift(activity);
+        state.points += Math.round(km * KM_TO_POINTS);
+        
+        checkAchievements();
+        saveState(state);
+        toast('Activity Saved!');
+        renderAll();
+    }
+    
+    function getActivitiesByDay(dayISO) {
+        return state.activities.filter(a => a.dateISO.slice(0, 10) === dayISO);
+    }
+    
+    function getKmTotalForDay(dayISO) {
+        return getActivitiesByDay(dayISO).reduce((sum, a) => sum + a.km, 0);
+    }
+
+    function getWeekKm() {
+        const now = new Date();
+        const dayOfWeek = (now.getDay() + 6) % 7; // Monday is 0, Sunday is 6
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - dayOfWeek);
+        monday.setHours(0, 0, 0, 0);
+        return state.activities
+            .filter(a => new Date(a.dateISO) >= monday)
+            .reduce((sum, a) => sum + a.km, 0);
+    }
+    
+    function checkAchievements() {
+        // Calculate Streak
+        const loggedDays = new Set(state.activities.map(a => a.dateISO.slice(0, 10)));
+        let currentStreak = 0;
+        let d = new Date();
+        while (loggedDays.has(d.toISOString().slice(0, 10))) {
+            currentStreak++;
+            d.setDate(d.getDate() - 1);
+        }
+        state.streak = currentStreak;
+        state.longestStreak = Math.max(state.longestStreak, state.streak);
+
+        // Check for Badges (example: Iron Leaf for >25km in a day)
+        if (getKmTotalForDay(todayISO()) >= 25 && !state.badges.includes('Iron Leaf')) {
+            state.badges.push('Iron Leaf');
+            toast('Badge Unlocked: Iron Leaf!');
+        }
+
+        // Update Rank
+        const pts = state.points;
+        state.rank = pts > 5000 ? 'Platinum' : pts > 2500 ? 'Gold' : pts > 1000 ? 'Silver' : 'Bronze';
+    }
+
+
+    // --- Rendering Functions ---
+
+    function renderAll() {
+        const currentTab = document.querySelector('.tab.active').dataset.tab;
+        renderHome();
+        if (currentTab === 'rewards') renderRewards();
+        if (currentTab === 'leaderboard') renderLeaderboard();
+        if (currentTab === 'history') renderHistory();
+        if (currentTab === 'community') renderCommunityFeed();
+    }
+    
+    function renderHome() {
+        const todayKm = getKmTotalForDay(todayISO());
+        elements.todayKm.textContent = `${formatNumber(todayKm)} km`;
+        elements.todayPts.textContent = `${Math.floor(todayKm * KM_TO_POINTS)} pts`;
+        elements.co2Saved.textContent = `${formatNumber(todayKm * CO2_PER_KM_SAVED, 2)} kg`;
+        
+        const weekKm = getWeekKm();
+        elements.weekGoal.textContent = state.weekGoal;
+        elements.weekTotal.textContent = formatNumber(weekKm);
+        elements.goalBar.style.width = `${Math.min(100, (weekKm / state.weekGoal) * 100)}%`;
+        
+        elements.dayStreak.textContent = `${state.streak}-day streak`;
+        elements.longestStreak.textContent = state.longestStreak;
+        elements.badgesCount.textContent = state.badges.length;
+        elements.rank.textContent = state.rank;
+        
+        renderRecentActivities();
+    }
+
+    function renderRecentActivities() {
+        elements.recentList.innerHTML = '';
+        if (state.activities.length === 0) {
+            elements.recentList.innerHTML = `<div class="muted" style="text-align:center;padding:20px 0;">Log your first trip to see it here!</div>`;
+            return;
+        }
+        state.activities.slice(0, 2).forEach(a => {
+            const el = document.createElement('div');
+            el.className = 'activity';
+            el.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px">
+                    <div style="display:flex; align-items:center; gap:10px">
+                        <span class="chip" style="padding:4px 8px;font-size:12px;">${getModeIcon(a.mode)} ${a.mode}</span> 
+                        <div>${formatNumber(a.km)} km</div>
+                    </div> 
+                    <div class="muted" style="font-size:12px">${new Date(a.dateISO).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                </div> 
+                ${a.note ? `<div class="muted" style="margin-top:6px; font-style:italic;">"${escapeHTML(a.note)}"</div>` : ''}`;
+            elements.recentList.appendChild(el);
+        });
+    }
+
+    function renderRewards() {
+        const rewardsData = [
+            { brand: 'GreenBottle', title: '15% Off Reusable Bottle', desc: 'BPA-free, stainless steel', cost: 250 },
+            { brand: 'LeafWear', title: '฿200 Voucher', desc: 'Organic cotton apparel', cost: 600 },
+            { brand: 'EcoRide', title: 'Free Bike Tune-Up', desc: 'Partner shop network', cost: 900 },
+            { brand: 'PlantBox', title: 'Urban Garden Starter Kit', desc: 'Seeds + soil + guide', cost: 1200 },
+        ];
+
+        elements.myPoints.textContent = state.points;
+        elements.rewardsList.innerHTML = '';
+        rewardsData.forEach((r, i) => {
+            const canAfford = state.points >= r.cost;
+            const el = document.createElement('div');
+            el.className = 'reward';
+            el.innerHTML = `
+                <div>
+                    <div style="font-weight:700">${r.brand} • ${r.title}</div>
+                    <div class="muted" style="font-size:12px">${r.desc}</div>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px">
+                    <div class="pill">${r.cost} pts</div>
+                    <button class="cta ${canAfford ? 'primary' : ''}" ${!canAfford ? 'disabled' : ''}>
+                        ${canAfford ? 'Redeem' : 'Locked'}
+                    </button>
+                </div>`;
+            el.querySelector('button').onclick = () => {
+                if (!canAfford) return;
+                state.points -= r.cost;
+                saveState(state);
+                toast(`Redeemed: ${r.title}`);
+                renderRewards(); // Re-render to update button states
+            };
+            elements.rewardsList.appendChild(el);
+        });
+    }
+
+    function renderLeaderboard() {
+        const dummyData = [
+            { name: 'Aom S.', km: 18.6, badge: '' },
+            { name: 'Ken T.', km: 32.1, badge: 'Iron Leaf' },
+            { name: 'Mina P.', km: 21.4, badge: '' },
+            { name: 'Jazz R.', km: 26.9, badge: 'Iron Leaf' },
+            { name: 'Bao', km: 14.3, badge: '' },
+        ];
+
+        const myTodayKm = getKmTotalForDay(todayISO());
+        const myData = { name: 'You', km: parseFloat(formatNumber(myTodayKm, 1)), badge: myTodayKm >= 25 ? 'Iron Leaf' : '' };
+        
+        const leaderboard = [...dummyData, myData].sort((a, b) => b.km - a.km);
+
+        elements.leaderboard.innerHTML = '';
+        leaderboard.forEach((row, idx) => {
+            const el = document.createElement('div');
+            el.className = 'board-row';
+            if (row.name === 'You') el.style.background = 'var(--card-bg)';
+            el.innerHTML = `
+                <div class="muted">${idx + 1}</div>
+                <div style="display:flex; align-items:center; gap:10px">
+                    ${row.badge ? `<span class="chip" style="padding:4px 8px;font-size:12px;">🏅 ${row.badge}</span>` : ''}
+                    <strong>${row.name}</strong>
+                </div>
+                <div class="pill">${formatNumber(row.km)} km</div>`;
+            elements.leaderboard.appendChild(el);
+        });
+    }
+    
+    function renderHistory() {
+        elements.historyList.innerHTML = '';
+        if (state.activities.length === 0) {
+            elements.historyList.innerHTML = `<div class="muted" style="text-align:center;padding:20px 0;">No activities logged yet.</div>`;
+            return;
+        }
+        state.activities.forEach(a => {
+            const el = document.createElement('div');
+            el.className = 'activity';
+            el.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:10px">
+                    <div style="display:flex; align-items:center; gap:10px">
+                        <div class="icon">${getModeIcon(a.mode, true)}</div>
+                        <div>
+                            <div style="font-weight:700">${formatNumber(a.km)} km • ${a.mode}</div>
+                            <div class="muted" style="font-size:12px">CO₂ saved: ${formatNumber(a.km * CO2_PER_KM_SAVED, 2)} kg</div>
+                        </div>
+                    </div>
+                    <div class="muted" style="font-size:12px">${new Date(a.dateISO).toLocaleString()}</div>
+                </div>
+                ${a.note ? `<div class="muted" style="margin-top:6px;font-style:italic;">"${escapeHTML(a.note)}"</div>` : ''}`;
+            elements.historyList.appendChild(el);
+        });
+    }
+
+    function renderCommunityFeed() {
+        const posts = [
+            { user: 'Ken T.', time: '2h ago', mode: 'bike', text: 'Crushed a 30km bike commute — Iron Leaf unlocked! 🌿', likes: 24 },
+            { user: 'Aom S.', time: '5h ago', mode: 'walk', text: 'Morning walk + BTS to campus saved 1.2kg CO₂ this week.', likes: 12 },
+            { user: 'Bao', time: 'Yesterday', mode: 'transit', text: 'Transit only week challenge — who’s in?', likes: 17 },
+        ];
+        
+        elements.communityFeed.innerHTML = '';
+        posts.forEach(p => {
+            const el = document.createElement('div');
+            el.className = 'post';
+            el.innerHTML = `
+                <div style="display:flex; gap:10px; align-items:center">
+                    <div style="width:40px;height:40px;border-radius:12px; background:var(--bg); display:grid;place-items:center; border:1px solid var(--card-border)">
+                        ${getModeIcon(p.mode, true)}
+                    </div>
+                    <div>
+                        <div style="font-weight:700">${p.user}</div>
+                        <div class="muted" style="font-size:12px">${p.time}</div>
+                    </div>
+                </div>
+                <div style="margin-top:12px;font-size:16px;">${p.text}</div>
+                <div style="display:flex; gap:10px; margin-top:12px">
+                    <button class="cta">👍 ${p.likes}</button>
+                    <button class="cta">💬 Comment</button>
+                </div>`;
+            elements.communityFeed.appendChild(el);
+        });
+    }
+    
+    // --- UI/UX Helpers ---
+    
+    function toast(msg) {
+        elements.toast.textContent = msg;
+        elements.toast.classList.add('show');
+        setTimeout(() => elements.toast.classList.remove('show'), 2500);
+    }
+    
+    function getModeIcon(mode, isSVG = false) {
+        const icons = {
+            bike: { emoji: '🚲', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5.5" cy="17.5" r="3.5"></circle><circle cx="18.5" cy="17.5" r="3.5"></circle><path d="M15 17.5h-5l4-10-6 2"></path><path d="m6 9 2 2"></path></svg>` },
+            walk: { emoji: '🚶', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"></circle><path d="M9 20l3-6 4 3-2.5 4.5"></path><path d="M15 13l-3-4-3 5.5"></path></svg>` },
+            transit: { emoji: '🚌', svg: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M3 11V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"></path><path d="M8 16h.01"></path><path d="M16 16h.01"></path><path d="M5 21v-3"></path><path d="M19 21v-3"></path></svg>` }
+        };
+        const iconData = icons[mode] || icons['walk'];
+        return isSVG ? iconData.svg : iconData.emoji;
+    }
+
+    // --- Confetti Animation ---
+    let confettiContext = elements.confettiCanvas.getContext('2d');
+    function resizeConfetti() { elements.confettiCanvas.width = window.innerWidth; elements.confettiCanvas.height = window.innerHeight; }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function confettiBurst() {
+        let pieces = Array.from({ length: 80 }, () => ({
+            x: window.innerWidth / 2, y: 120, r: Math.random() * 4 + 2,
+            vx: (Math.random() - 0.5) * 6, vy: Math.random() * 2 + 2,
+        }));
+        let frame = 0;
+        const animation = () => {
+            confettiContext.clearRect(0, 0, elements.confettiCanvas.width, elements.confettiCanvas.height);
+            pieces.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.vy += 0.08;
+                confettiContext.fillStyle = `hsl(${200 + Math.random() * 60}, 90%, 70%)`;
+                confettiContext.beginPath(); confettiContext.arc(p.x, p.y, p.r, 0, Math.PI * 2); confettiContext.fill();
+            });
+            if (++frame < 100) requestAnimationFrame(animation);
+        };
+        animation();
+    }
+
+
+    // --- Event Listeners Setup ---
+    
+    // Tab Navigation
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelector('.tab.active').classList.remove('active');
+            tab.classList.add('active');
+            
+            const targetId = `tab-${tab.dataset.tab}`;
+            document.querySelectorAll('.tabview').forEach(view => {
+                view.hidden = (view.id !== targetId);
+                if (view.id === targetId) {
+                    view.classList.add('fade-in-up');
+                    // Trigger renders only when tab is viewed
+                    if(tab.dataset.tab === 'rewards') renderRewards();
+                    if(tab.dataset.tab === 'leaderboard') renderLeaderboard();
+                    if(tab.dataset.tab === 'history') renderHistory();
+                    if(tab.dataset.tab === 'community') renderCommunityFeed();
+                } else {
+                    view.classList.remove('fade-in-up');
+                }
+            });
+        });
+    });
+
+    // Modal and Action Buttons
+    document.getElementById('btnQuickLog').onclick = () => elements.logModal.showModal();
+    document.getElementById('btnSetGoal').onclick = () => { document.getElementById('goalInput').value = state.weekGoal; elements.goalModal.showModal(); };
+
+    document.getElementById('btnSaveGoal').onclick = () => {
+        const newGoal = Math.max(5, parseInt(document.getElementById('goalInput').value, 10) || state.weekGoal);
+        state.weekGoal = newGoal;
+        saveState(state);
+        toast('Weekly goal updated!');
+        renderHome();
+        elements.goalModal.close();
+    };
+    
+    document.getElementById('btnSaveLog').onclick = () => {
+        const km = parseFloat(document.getElementById('logKm').value);
+        if (!km || km <= 0) return toast('Please enter a valid distance.');
+        
+        const mode = document.getElementById('logMode').value;
+        const note = document.getElementById('logNote').value.trim();
+        addActivity(km, mode, note);
+
+        document.getElementById('logKm').value = '';
+        document.getElementById('logNote').value = '';
+        elements.logModal.close();
+        confettiBurst();
+    };
+
+    let gpsTimer = null;
+    let gpsKmAccumulator = 0;
+    document.getElementById('btnStartGPS').onclick = (e) => {
+        const btn = e.currentTarget;
+        if (gpsTimer) {
+            // Stopping GPS
+            clearInterval(gpsTimer);
+            gpsTimer = null;
+            if (gpsKmAccumulator > 0.1) {
+                addActivity(gpsKmAccumulator, 'bike', 'GPS tracked session');
+                confettiBurst();
+            }
+            gpsKmAccumulator = 0;
+            btn.innerHTML = '▶ Start GPS';
+            renderHome(); // Re-render to finalize stats
+        } else {
+            // Starting GPS
+            btn.innerHTML = '⏹ Stop GPS';
+            const homeKm = getKmTotalForDay(todayISO()); // Km so far today
+            gpsTimer = setInterval(() => {
+                gpsKmAccumulator += 0.05; // Simulate distance increase
+                const currentTotalKm = homeKm + gpsKmAccumulator;
+                elements.todayKm.textContent = `${formatNumber(currentTotalKm)} km`;
+                elements.todayPts.textContent = `${Math.floor(currentTotalKm * KM_TO_POINTS)} pts`;
+                elements.co2Saved.textContent = `${formatNumber(currentTotalKm * CO2_PER_KM_SAVED, 2)} kg`;
+            }, 1000);
+        }
+    };
+    
+    // Share Button
+    document.getElementById('btnShare').onclick = async () => {
+        const todayKm = getKmTotalForDay(todayISO());
+        const co2Saved = todayKm * CO2_PER_KM_SAVED;
+        const text = `I logged ${formatNumber(todayKm)} eco km today and saved ${formatNumber(co2Saved, 2)} kg of CO₂ on EcoCommute! 🌿 #EcoCommuteChallenge`;
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'My EcoCommute Progress', text: text });
+                toast('Progress shared!');
+            } else {
+                await navigator.clipboard.writeText(text);
+                toast('Copied to clipboard!');
+            }
+        } catch (err) {
+            console.error('Share failed:', err);
+            toast('Could not share.');
+        }
+    };
+    
+    // --- Initial App Load ---
+
+    function initializeApp() {
+        if (state.activities.length === 0) {
+            // Add a welcome activity for new users
+            addActivity(3.2, 'walk', 'My first eco-friendly trip!');
+        } else {
+            checkAchievements();
+            renderHome();
+        }
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
